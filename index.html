@@ -128,7 +128,7 @@ function load(){var s=byId(Q[qi]);if(!s)return next();
 function playQ(ids,i){Q=ids;qi=i;load();if(!cur().np)push({title:'In riproduzione',np:true});else draw()}
 function next(){if(!Q.length)return;qi=(qi+1)%Q.length;load()}
 function prev(){if(!Q.length)return;if(A.currentTime>3){A.currentTime=0;return}qi=(qi-1+Q.length)%Q.length;load()}
-function toggle(){if(!Q.length){if(S.songs.length)playQ(S.songs.map(function(s){return s.id}),0);return}A.paused?A.play():A.pause()}
+function toggle(){if(!Q.length){if(S.songs.length)playQ(sortedIds(),0);return}A.paused?A.play():A.pause()}
 var shown=null;
 function updNP(){if(!cur().np)return;var id=Q[qi],s=byId(id);
  $('nt').textContent=s?s.t:'';$('na').textContent=s?s.a:'';$('nb').textContent=s&&s.al?s.al:'';
@@ -152,6 +152,7 @@ A.addEventListener('ended',function(){if(qi<Q.length-1)next();else A.pause()});
 /* ---- elenchi ---- */
 function songItems(ids){var l=ids.filter(byId);return l.map(function(id,i){return {t:byId(id).t,ok:function(){playQ(l,i)}}})}
 function allIds(){return S.songs.map(function(s){return s.id})}
+function sortedIds(){return S.songs.slice().sort(function(a,b){return a.t.localeCompare(b.t,'it',{sensitivity:'base',numeric:true})}).map(function(s){return s.id})}
 function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
 function openImport(){push({title:'Importa',build:function(){return [
  {t:'Scegli brani',v:'\u203A',ok:function(){$('fm').click()}},
@@ -180,7 +181,7 @@ function setScreen(){return {title:'Impostazioni',build:function(){return [
  {t:'Ripristina layout',ok:function(){S.set.ws=S.set.ds=S.set.ts=S.set.dw=100;S.set.dy=S.set.wy=0;save();apply();draw()}},
  {t:'Cancella libreria',ok:function(){if(confirm('Cancellare tutti i brani e le playlist?')){S.songs=[];S.pls=[];Q=[];A.pause();clearAll();save();draw()}}}]}}}
 function mainScreen(){return {title:'VintagePod',build:function(){var r=[
- {t:'Brani',v:'\u203A',ok:function(){push({title:'Brani',build:function(){return S.songs.length?songItems(allIds()):[{t:'Nessun brano: importa',ok:openImport}]}})}},
+ {t:'Brani',v:'\u203A',ok:function(){push({title:'Brani',build:function(){return S.songs.length?songItems(sortedIds()):[{t:'Nessun brano: importa',ok:openImport}]}})}},
  {t:'Playlist',v:'\u203A',ok:function(){push(plsScreen())}},
  {t:'Shuffle brani',ok:function(){if(S.songs.length)playQ(shuffle(allIds()),0)}}];
  if(Q.length)r.splice(0,0,{t:'In riproduzione',v:'\u203A',ok:function(){push({title:'In riproduzione',np:true})}});
