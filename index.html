@@ -8,7 +8,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="apple-touch-icon.png">
 <style>
-:root{--ws:1;--ds:1;--ts:1;--dw:1;--dy:0;--wy:0;--lk:#4a4b4e;--body:#d4d5d8;--wheel:#eeeff0;--ink:#6a6b6e;--bar:#2f7de1}
+:root{--ws:1;--ds:1;--ts:1;--dw:1;--dy:0;--wy:0;--lk:#4a4b4e;--lx:0;--ly:0;--lz:1;--body:#d4d5d8;--wheel:#eeeff0;--ink:#6a6b6e;--bar:#2f7de1}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--body);font-family:-apple-system,"Helvetica Neue",Helvetica,Arial,sans-serif}
 #pod{position:relative;height:100%;max-width:380px;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;justify-content:space-around;overflow-y:auto}
@@ -37,8 +37,9 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--body);font-famil
 .lp{bottom:9%;left:50%;transform:translateX(-50%)}
 .ll{left:8%;top:50%;transform:translateY(-50%)}
 .lr{right:8%;top:50%;transform:translateY(-50%)}
-#lk{position:absolute;left:10px;bottom:max(8px,env(safe-area-inset-bottom));width:48px;height:48px;border:0;background:none;padding:0;color:var(--lk);opacity:.6;display:flex;align-items:center;justify-content:center;z-index:5}
+#lk{position:absolute;left:10px;bottom:max(8px,env(safe-area-inset-bottom));width:calc(48px*var(--lz));height:calc(48px*var(--lz));transform:translate(calc(var(--lx)*1px),calc(var(--ly)*-1px));border:0;background:none;padding:0;color:var(--lk);opacity:.6;display:flex;align-items:center;justify-content:center;z-index:5}
 #lk.on{opacity:1}
+#lk svg{width:58%;height:58%}
 .fi{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 </style></head><body>
 <div id="pod">
@@ -47,7 +48,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--body);font-famil
   <div id="ls"></div>
   <div id="np"><div id="nr"><div id="cv"></div><div id="nx"><b id="nt"></b><i id="na"></i><i id="nb"></i></div></div><div><div id="pb"><div id="pf"></div></div><div id="tm"><span id="tc">0:00</span><span id="td">0:00</span></div></div></div>
  </div>
- <button id="lk" type="button" aria-label="Blocco"><svg viewBox="0 0 24 24" width="28" height="28"><path id="lsh" d="M7 11V8a5 5 0 0 1 9.4-2.3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><rect x="4.5" y="11" width="15" height="11" rx="2.5" fill="currentColor"/></svg></button>
+ <button id="lk" type="button" aria-label="Blocco"><svg viewBox="0 0 24 24"><path id="lsh" d="M7 11V8a5 5 0 0 1 9.4-2.3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><rect x="4.5" y="11" width="15" height="11" rx="2.5" fill="currentColor"/></svg></button>
  <div id="wh">
   <div class="lb lm">MENU</div>
   <div class="lb lp">&#9654;&#xFE0E;&#10074;&#10074;</div>
@@ -64,12 +65,13 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--body);font-famil
 (function(){
 var $=function(i){return document.getElementById(i)};
 var A=$('au'),LS=$('ls'),WH=$('wh');
-var S={songs:[],pls:[],set:{ws:100,ds:100,ts:100,dw:100,dy:0,wy:0,body:0,wheel:0,bar:0}};
+var S={songs:[],pls:[],set:{ws:100,ds:100,ts:100,dw:100,dy:0,wy:0,lx:0,ly:0,ls:100,body:0,wheel:0,bar:0}};
 var BARS=[['Blu','#2f7de1'],['Verde','#2fa84f'],['Arancio','#f08a1c'],['Rosso','#d93c3c'],['Grigio','#7b7f86']];
 var BODIES=[['Grigio chiaro','#d4d5d8'],['Antracite','#2c2e32'],['Verde chiaro','#c5f7c3'],['Verde scuro','#004e48'],['Giallo','#faff79'],['Rosa','#efbfe2'],['Viola scuro','#312232']];
 var WHEELS=[['Bianco','#f4f4f5','#6a6b6e'],['Nero','#17181a','#d6d7da']];
 var SIZES=[70,80,90,100,110,120,130,140];
 var WIDTHS=[50,55,60,65,70,75,80,85,90,95,100];
+var LXS=[],LYS=[];for(var qx=0;qx<=300;qx+=10)LXS.push(qx);for(var qy=0;qy<=500;qy+=10)LYS.push(qy);
 var POS=[];for(var pi=-80;pi<=80;pi+=8)POS.push(pi);
 var locked=false,STEP=22,mem={},db=null,Q=[],qi=0,url=null,unlocked=false,stack=[];
 
@@ -79,7 +81,7 @@ try{var o=JSON.parse(localStorage.getItem('vp')||'null');if(o){S.songs=o.songs||
 function apply(){var s=S.set,r=document.documentElement.style;
  if(typeof s.body=='string'){var dk=s.body=='d';s.body=dk?1:0;s.wheel=dk?1:0}
  var w=WHEELS[s.wheel]||WHEELS[0],bd=BODIES[s.body]||BODIES[0];
- r.setProperty('--ws',s.ws/100);r.setProperty('--dw',s.dw/100);r.setProperty('--dy',s.dy);r.setProperty('--wy',s.wy);r.setProperty('--ds',s.ds/100);r.setProperty('--ts',s.ts/100);
+ r.setProperty('--ws',s.ws/100);r.setProperty('--dw',s.dw/100);r.setProperty('--dy',s.dy);r.setProperty('--wy',s.wy);r.setProperty('--lx',s.lx);r.setProperty('--ly',s.ly);r.setProperty('--lz',s.ls/100);r.setProperty('--ds',s.ds/100);r.setProperty('--ts',s.ts/100);
  r.setProperty('--body',bd[1]);r.setProperty('--wheel',w[1]);r.setProperty('--ink',w[2]);r.setProperty('--bar',BARS[s.bar][1]);
  var h=bd[1],L=0.299*parseInt(h.substr(1,2),16)+0.587*parseInt(h.substr(3,2),16)+0.114*parseInt(h.substr(5,2),16);r.setProperty('--lk',L>140?'#4a4b4e':'#e8e8ea')}
 
@@ -178,6 +180,10 @@ function pc(v){return v+'%'}
 function pf(v){return v==0?'Centro':(v<0?'Su ':'Gi\u00F9 ')+Math.abs(v)}
 function lst(t,k,l,f){return {t:t,v:f(S.set[k]),ok:function(){chg(k,1,true,l)},lf:function(){chg(k,-1,false,l)},rt:function(){chg(k,1,false,l)}}}
 function dispScreen(){return {title:'Display',build:function(){return [lst('Altezza','ds',SIZES,pc),lst('Larghezza','dw',WIDTHS,pc),lst('Posizione','dy',POS,pf)]}}}
+function lockScreen(){return {title:'Lucchetto',build:function(){return [
+ lst('Orizzontale','lx',LXS,function(v){return v==0?'Sinistra':'Destra '+v}),
+ lst('Verticale','ly',LYS,function(v){return v==0?'Basso':'Su '+v}),
+ lst('Dimensione','ls',SIZES,pc)]}}}
 function ringScreen(){return {title:'Anello',build:function(){return [lst('Dimensione','ws',SIZES,pc),lst('Posizione','wy',POS,pf)]}}}
 function cyc(k,n,d){S.set[k]=(S.set[k]+d+n)%n;save();apply();draw()}
 function bar(d){S.set.bar=(S.set.bar+d+BARS.length)%BARS.length;save();apply();draw()}
@@ -194,11 +200,12 @@ function setScreen(){return {title:'Impostazioni',build:function(){return [
  {t:'Elimina brano',v:'\u203A',ok:function(){push(delScreen())}},
  {t:'Impostazioni display',v:'\u203A',ok:function(){push(dispScreen())}},
  {t:'Impostazioni anello',v:'\u203A',ok:function(){push(ringScreen())}},
+ {t:'Impostazioni lucchetto',v:'\u203A',ok:function(){push(lockScreen())}},
  lst('Testo','ts',SIZES,pc),
  {t:'Colore corpo',v:BODIES[S.set.body][0],ok:function(){cyc('body',BODIES.length,1)},lf:function(){cyc('body',BODIES.length,-1)},rt:function(){cyc('body',BODIES.length,1)}},
  {t:'Colore anello',v:WHEELS[S.set.wheel][0],ok:function(){cyc('wheel',2,1)},lf:function(){cyc('wheel',2,1)},rt:function(){cyc('wheel',2,1)}},
  {t:'Barra selezione',v:BARS[S.set.bar][0],ok:function(){bar(1)},lf:function(){bar(-1)},rt:function(){bar(1)}},
- {t:'Ripristina layout',ok:function(){S.set.ws=S.set.ds=S.set.ts=S.set.dw=100;S.set.dy=S.set.wy=0;save();apply();draw()}},
+ {t:'Ripristina layout',ok:function(){S.set.ws=S.set.ds=S.set.ts=S.set.dw=100;S.set.dy=S.set.wy=S.set.lx=S.set.ly=0;S.set.ls=100;save();apply();draw()}},
  {t:'Cancella libreria',ok:function(){if(confirm('Cancellare tutti i brani e le playlist?')){S.songs=[];S.pls=[];Q=[];A.pause();clearAll();save();draw()}}}]}}}
 function mainScreen(){return {title:'VintagePod',build:function(){var r=[
  {t:'Brani',v:'\u203A',ok:function(){push({title:'Brani',build:function(){return S.songs.length?songItems(sortedIds()):[{t:'Nessun brano: importa',ok:openImport}]}})}},
@@ -323,10 +330,8 @@ $('cb').addEventListener('touchstart',function(e){unlock();stop(e)});$('cb').add
 $('cb').addEventListener('click',function(){unlock();if(locked){flash('Bloccato');return}ok()});
 var lt=null,LK=$('lk');
 function setLock(v){locked=v;LK.className=v?'on':'';$('lsh').setAttribute('d',v?'M7 11V8a5 5 0 0 1 10 0v3':'M7 11V8a5 5 0 0 1 9.4-2.3');flash(v?'Bloccato':'Sbloccato')}
-function lkDown(e){e.preventDefault();e.stopPropagation();unlock();
- if(!locked){setLock(true);return}
- flash('Tieni premuto...');clearTimeout(lt);lt=setTimeout(function(){lt=null;setLock(false)},900)}
-function lkUp(e){e.stopPropagation();clearTimeout(lt)}
+function lkDown(e){e.preventDefault();e.stopPropagation();unlock();setLock(!locked)}
+function lkUp(e){e.stopPropagation()}
 LK.addEventListener('touchstart',lkDown,{passive:false});LK.addEventListener('touchend',lkUp);LK.addEventListener('touchcancel',lkUp);
 LK.addEventListener('mousedown',lkDown);LK.addEventListener('mouseup',lkUp);LK.addEventListener('mouseleave',lkUp);
 
