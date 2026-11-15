@@ -71,7 +71,8 @@ var BODIES=[['Grigio chiaro','#d4d5d8'],['Antracite','#2c2e32'],['Verde chiaro',
 var WHEELS=[['Bianco','#f4f4f5','#6a6b6e'],['Nero','#17181a','#d6d7da']];
 var SIZES=[70,80,90,100,110,120,130,140];
 var WIDTHS=[50,55,60,65,70,75,80,85,90,95,100];
-var LXS=[],LYS=[];for(var qx=0;qx<=300;qx+=10)LXS.push(qx);for(var qy=0;qy<=500;qy+=10)LYS.push(qy);
+var LYS=[];for(var qy=-30;qy<=30;qy+=5)LYS.push(qy);
+var RPOS=[];for(var rp=-50;rp<=200;rp+=10)RPOS.push(rp);
 var POS=[];for(var pi=-80;pi<=80;pi+=8)POS.push(pi);
 var locked=false,STEP=22,mem={},db=null,Q=[],qi=0,url=null,unlocked=false,stack=[];
 
@@ -81,7 +82,7 @@ try{var o=JSON.parse(localStorage.getItem('vp')||'null');if(o){S.songs=o.songs||
 function apply(){var s=S.set,r=document.documentElement.style;
  if(typeof s.body=='string'){var dk=s.body=='d';s.body=dk?1:0;s.wheel=dk?1:0}
  var w=WHEELS[s.wheel]||WHEELS[0],bd=BODIES[s.body]||BODIES[0];
- r.setProperty('--ws',s.ws/100);r.setProperty('--dw',s.dw/100);r.setProperty('--dy',s.dy);r.setProperty('--wy',s.wy);r.setProperty('--lx',s.lx);r.setProperty('--ly',s.ly);r.setProperty('--lz',s.ls/100);r.setProperty('--ds',s.ds/100);r.setProperty('--ts',s.ts/100);
+ r.setProperty('--ws',s.ws/100);r.setProperty('--dw',s.dw/100);r.setProperty('--dy',s.dy);if(s.wy<-50)s.wy=-50;if(s.wy>200)s.wy=200;r.setProperty('--wy',s.wy);s.lx=0;if(s.ly<-30)s.ly=-30;if(s.ly>30)s.ly=30;r.setProperty('--lx',0);r.setProperty('--ly',s.ly);r.setProperty('--lz',s.ls/100);r.setProperty('--ds',s.ds/100);r.setProperty('--ts',s.ts/100);
  r.setProperty('--body',bd[1]);r.setProperty('--wheel',w[1]);r.setProperty('--ink',w[2]);r.setProperty('--bar',BARS[s.bar][1]);
  var h=bd[1],L=0.299*parseInt(h.substr(1,2),16)+0.587*parseInt(h.substr(3,2),16)+0.114*parseInt(h.substr(5,2),16);r.setProperty('--lk',L>140?'#4a4b4e':'#e8e8ea')}
 
@@ -181,10 +182,9 @@ function pf(v){return v==0?'Centro':(v<0?'Su ':'Gi\u00F9 ')+Math.abs(v)}
 function lst(t,k,l,f){return {t:t,v:f(S.set[k]),ok:function(){chg(k,1,true,l)},lf:function(){chg(k,-1,false,l)},rt:function(){chg(k,1,false,l)}}}
 function dispScreen(){return {title:'Display',build:function(){return [lst('Altezza','ds',SIZES,pc),lst('Larghezza','dw',WIDTHS,pc),lst('Posizione','dy',POS,pf)]}}}
 function lockScreen(){return {title:'Lucchetto',build:function(){return [
- lst('Orizzontale','lx',LXS,function(v){return v==0?'Sinistra':'Destra '+v}),
- lst('Verticale','ly',LYS,function(v){return v==0?'Basso':'Su '+v}),
+ lst('Posizione','ly',LYS,function(v){return v==0?'Basso':(v>0?'Su ':'Gi\u00F9 ')+Math.abs(v)}),
  lst('Dimensione','ls',SIZES,pc)]}}}
-function ringScreen(){return {title:'Anello',build:function(){return [lst('Dimensione','ws',SIZES,pc),lst('Posizione','wy',POS,pf)]}}}
+function ringScreen(){return {title:'Anello',build:function(){return [lst('Dimensione','ws',SIZES,pc),lst('Posizione','wy',RPOS,pf)]}}}
 function cyc(k,n,d){S.set[k]=(S.set[k]+d+n)%n;save();apply();draw()}
 function bar(d){S.set.bar=(S.set.bar+d+BARS.length)%BARS.length;save();apply();draw()}
 function delKey(k){delete mem[k];if(db){try{db.transaction('b','readwrite').objectStore('b').delete(k)}catch(e){}}}
@@ -337,5 +337,6 @@ LK.addEventListener('mousedown',lkDown);LK.addEventListener('mouseup',lkUp);LK.a
 
 /* ---- avvio ---- */
 apply();stack=[mainScreen()];openDB(function(){draw()});
+if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js')}catch(e){}}
 })();
 </script></body></html>
